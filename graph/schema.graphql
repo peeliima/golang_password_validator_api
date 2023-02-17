@@ -1,0 +1,8 @@
+type Password {
+  password: String!
+}
+
+type Query {
+  password: [Password!]!
+}
+

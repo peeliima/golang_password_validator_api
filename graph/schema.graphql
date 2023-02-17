@@ -3,6 +3,6 @@ type Password {
 }
 
 type Query {
-  password: [Password!]!
+  password (password: String!): Password!
 }
 

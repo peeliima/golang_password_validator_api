@@ -12,6 +12,7 @@ import (
 
 // Password is the resolver for the password field.
 func (r *queryResolver) Password(ctx context.Context) ([]*model.Password, error) {
+	fmt.Println(&r)
 	panic(fmt.Errorf("not implemented: Password - password"))
 }
 

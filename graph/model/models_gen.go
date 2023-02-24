@@ -5,3 +5,13 @@ package model
 type Password struct {
 	Password string `json:"password"`
 }
+
+type RuleInput struct {
+	Rule  string `json:"rule"`
+	Value int    `json:"value"`
+}
+
+type ValidatorPasswordInput struct {
+	Password string       `json:"password"`
+	Rules    []*RuleInput `json:"rules"`
+}

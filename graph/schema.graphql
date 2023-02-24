@@ -6,3 +6,16 @@ type Query {
   password (password: String!): Password!
 }
 
+input RuleInput {
+  rule: String!
+  value: Int!
+}
+
+input ValidatorPasswordInput {
+  password: String!
+  rules: [RuleInput!]!
+}
+
+type Mutation {
+  validatorPassword(input: ValidatorPasswordInput!): String!
+}

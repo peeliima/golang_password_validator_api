@@ -17,5 +17,5 @@ input ValidatorPasswordInput {
 }
 
 type Mutation {
-  validatorPassword(input: ValidatorPasswordInput!): String!
+  validatorPassword(input: ValidatorPasswordInput!): [String!]!
 }

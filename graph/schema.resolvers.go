@@ -12,7 +12,7 @@ import (
 )
 
 // ValidatorPassword is the resolver for the validatorPassword field.
-func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.ValidatorPasswordInput) (string, error) {
+func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.ValidatorPasswordInput) ([]string, error) {
 	password := input.Password
 	valid_password := false
 
@@ -29,20 +29,17 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 	}
 
 	if len(errors) > 0 {
-		return "errors", nil
+		return errors, nil
 	}
 
-	return "Senha válida!", nil
+	errors = append(errors, "Senha Válida!")
+	return errors, nil
 }
 
 func minSize(password string, value int) bool {
 	count := utf8.RuneCountInString(password)
 
-	if count <= value {
-		return false
-	}
-
-	return true
+	return count >= value
 }
 
 // Password is the resolver for the password field.

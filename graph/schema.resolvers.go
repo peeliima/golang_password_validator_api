@@ -33,6 +33,12 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 			if !valid_password {
 				errors = append(errors, "minUppercase")
 			}
+		case "minLowercase":
+			valid_password = minLowercase(password, rules.Value)
+
+			if !valid_password {
+				errors = append(errors, "minLowercase")
+			}
 		}
 	}
 
@@ -55,6 +61,18 @@ func minUppercase(password string, value int) bool {
 
 	for _, password_splited := range password {
 		if unicode.IsUpper(password_splited) {
+			count++
+		}
+	}
+
+	return count >= value
+}
+
+func minLowercase(password string, value int) bool {
+	count := 0
+
+	for _, password_splited := range password {
+		if unicode.IsLower(password_splited) {
 			count++
 		}
 	}

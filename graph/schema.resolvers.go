@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"golang_password_validator_api/graph/model"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -26,6 +27,14 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 				errors = append(errors, "minSize")
 			}
 		}
+
+		if rules.Rule == "minUppercase" {
+			valid_password = minUppercase(password, rules.Value)
+
+			if !valid_password {
+				errors = append(errors, "minUppercase")
+			}
+		}
 	}
 
 	if len(errors) > 0 {
@@ -38,6 +47,18 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 
 func minSize(password string, value int) bool {
 	count := utf8.RuneCountInString(password)
+
+	return count >= value
+}
+
+func minUppercase(password string, value int) bool {
+	count := 0
+
+	for _, password_splited := range password {
+		if unicode.IsUpper(password_splited) {
+			count++
+		}
+	}
 
 	return count >= value
 }

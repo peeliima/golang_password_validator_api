@@ -20,15 +20,14 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 	errors := []string{}
 
 	for _, rules := range input.Rules {
-		if rules.Rule == "minSize" {
+		switch rules.Rule {
+		case "minSize":
 			valid_password = minSize(password, rules.Value)
 
 			if !valid_password {
 				errors = append(errors, "minSize")
 			}
-		}
-
-		if rules.Rule == "minUppercase" {
+		case "minUppercase":
 			valid_password = minUppercase(password, rules.Value)
 
 			if !valid_password {

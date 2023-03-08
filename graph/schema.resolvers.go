@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"golang_password_validator_api/graph/model"
+	"regexp"
 	"unicode"
 	"unicode/utf8"
 )
@@ -44,6 +45,12 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 
 			if !valid_password {
 				errors = append(errors, "minSpecialChars")
+			}
+		case "minDigit":
+			valid_password = minDigit(password, rules.Value)
+
+			if !valid_password {
+				errors = append(errors, "minDigit")
 			}
 		}
 	}
@@ -84,6 +91,13 @@ func minLowercase(password string, value int) bool {
 	}
 
 	return count >= value
+}
+
+func minDigit(password string, value int) bool {
+	re := regexp.MustCompile("[0-9]")
+	digits := re.FindAllString(password, -1)
+
+	return len(digits) >= value
 }
 
 // Essa func eu queria implementar utilizando Regex porem não conseguir utilizar as funcoes do Go corretamente

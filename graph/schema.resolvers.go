@@ -39,6 +39,12 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 			if !valid_password {
 				errors = append(errors, "minLowercase")
 			}
+		case "minSpecialChars":
+			valid_password = minSpecialChars(password, rules.Value)
+
+			if !valid_password {
+				errors = append(errors, "minSpecialChars")
+			}
 		}
 	}
 
@@ -74,6 +80,23 @@ func minLowercase(password string, value int) bool {
 	for _, password_splited := range password {
 		if unicode.IsLower(password_splited) {
 			count++
+		}
+	}
+
+	return count >= value
+}
+
+// Essa func eu queria implementar utilizando Regex porem não conseguir utilizar as funcoes do Go corretamente
+// pra não perder muito tempo fiz da maneira abaixo, futuramente volto nesse ponto para implementar da maneira mais elegante
+func minSpecialChars(password string, value int) bool {
+	count := 0
+	special_caracteres := []rune{'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '\\', '/', '+', '{', '}'}
+
+	for _, pass := range password {
+		for _, char := range special_caracteres {
+			if pass == char {
+				count++
+			}
 		}
 	}
 

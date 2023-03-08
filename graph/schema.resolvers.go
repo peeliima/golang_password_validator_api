@@ -100,9 +100,19 @@ func minDigit(password string, value int) bool {
 	return len(digits) >= value
 }
 
+// Essa func precisa de um ajuste no Regex||Codigo, está com problemas na validação dos contra barras \ nas senhas
+// Preciso entender como resolver problemas vinculados a forma que o Golang lida com \
+func minSpecialChars(password string, value int) bool {
+	re := regexp.MustCompile("[!@#$%^&*()-\\/+{}\\[\\]]")
+	special_caracteres := re.FindAllString(password, -1)
+
+	return len(special_caracteres) >= value
+}
+
 // Essa func eu queria implementar utilizando Regex porem não conseguir utilizar as funcoes do Go corretamente
 // pra não perder muito tempo fiz da maneira abaixo, futuramente volto nesse ponto para implementar da maneira mais elegante
-func minSpecialChars(password string, value int) bool {
+// Att: Refiz a funcao utilizando Regex, mas vou deixar essa func no código por motivos academicos
+func minSpecialCharsDepreciated(password string, value int) bool {
 	count := 0
 	special_caracteres := []rune{'!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '\\', '/', '+', '{', '}'}
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"golang_password_validator_api/graph/model"
 	"testing"
+
+	"golang.org/x/exp/slices"
 )
 
 func TestValidatorPassword(t *testing.T) {
@@ -16,6 +18,10 @@ func TestValidatorPassword(t *testing.T) {
 		Rules: []*model.RuleInput{
 			{Rule: "minSize", Value: 2},
 			{Rule: "minUppercase", Value: 3},
+			{Rule: "minLowercase", Value: 3},
+			{Rule: "minSpecialChars", Value: 3},
+			{Rule: "minDigit", Value: 3},
+			{Rule: "noRepeted", Value: 3},
 		},
 	}
 
@@ -25,5 +31,39 @@ func TestValidatorPassword(t *testing.T) {
 
 	if response[0] != response_success[0] {
 		t.Errorf("Error")
+	}
+}
+
+func TestFailValidatorPassword(t *testing.T) {
+	context := context.Background()
+
+	resolver := Resolver{}
+
+	input_failed := model.ValidatorPasswordInput{
+		Password: "qwert",
+		Rules: []*model.RuleInput{
+			{Rule: "minSize", Value: 10},
+			{Rule: "minUppercase", Value: 10},
+			{Rule: "minLowercase", Value: 10},
+			{Rule: "minSpecialChars", Value: 3},
+			{Rule: "minDigit", Value: 10},
+		},
+	}
+
+	expect_response := []string{
+		"minSize",
+		"minUppercase",
+		"minLowercase",
+		"minSpecialChars",
+		"minDigit",
+	}
+
+	response, _ := resolver.Mutation().ValidatorPassword(context, input_failed)
+
+	// fmt.Println(response, expect_response)
+	for _, expect := range expect_response {
+		if !slices.Contains(response, expect) {
+			t.Errorf("A regra %s está com problemas", expect)
+		}
 	}
 }

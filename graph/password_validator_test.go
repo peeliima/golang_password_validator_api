@@ -30,7 +30,9 @@ func TestValidatorPassword(t *testing.T) {
 	response, _ := resolver.Mutation().ValidatorPassword(context, input_valid)
 
 	if response[0] != response_success[0] {
-		t.Errorf("Error")
+		for _, res := range response {
+			t.Errorf(res)
+		}
 	}
 }
 

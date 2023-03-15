@@ -16,44 +16,67 @@ import (
 // ValidatorPassword is the resolver for the validatorPassword field.
 func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.ValidatorPasswordInput) ([]string, error) {
 	password := input.Password
-	valid_password := false
 
 	errors := []string{}
 
 	for _, rules := range input.Rules {
 		switch rules.Rule {
 		case "minSize":
-			valid_password = minSize(password, rules.Value)
+			channel := make(chan bool)
+
+			go minSize(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
 
 			if !valid_password {
 				errors = append(errors, "minSize")
 			}
 		case "minUppercase":
-			valid_password = minUppercase(password, rules.Value)
+			channel := make(chan bool)
+
+			go minUppercase(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
 
 			if !valid_password {
 				errors = append(errors, "minUppercase")
 			}
 		case "minLowercase":
-			valid_password = minLowercase(password, rules.Value)
+			channel := make(chan bool)
+
+			go minLowercase(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
 
 			if !valid_password {
 				errors = append(errors, "minLowercase")
 			}
-		case "minSpecialChars":
-			valid_password = minSpecialChars(password, rules.Value)
-
-			if !valid_password {
-				errors = append(errors, "minSpecialChars")
-			}
 		case "minDigit":
-			valid_password = minDigit(password, rules.Value)
+			channel := make(chan bool)
+
+			go minDigit(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
 
 			if !valid_password {
 				errors = append(errors, "minDigit")
 			}
+		case "minSpecialChars":
+			channel := make(chan bool)
+
+			go minSpecialChars(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
+
+			if !valid_password {
+				errors = append(errors, "minSpecialChars")
+			}
 		case "noRepeted":
-			valid_password = noRepeted(password, rules.Value)
+			channel := make(chan bool)
+
+			go noRepeted(password, rules.Value, channel)
+
+			valid_password, _ := <-channel
 
 			if !valid_password {
 				errors = append(errors, "noRepeted")
@@ -69,13 +92,17 @@ func (r *mutationResolver) ValidatorPassword(ctx context.Context, input model.Va
 	return errors, nil
 }
 
-func minSize(password string, value int) bool {
+func minSize(password string, value int, channel chan bool) {
 	count := utf8.RuneCountInString(password)
 
-	return count >= value
+	if count >= value {
+		channel <- true
+	}
+
+	close(channel)
 }
 
-func minUppercase(password string, value int) bool {
+func minUppercase(password string, value int, channel chan bool) {
 	count := 0
 
 	for _, password_splited := range password {
@@ -84,10 +111,14 @@ func minUppercase(password string, value int) bool {
 		}
 	}
 
-	return count >= value
+	if count >= value {
+		channel <- true
+	}
+
+	close(channel)
 }
 
-func minLowercase(password string, value int) bool {
+func minLowercase(password string, value int, channel chan bool) {
 	count := 0
 
 	for _, password_splited := range password {
@@ -96,25 +127,37 @@ func minLowercase(password string, value int) bool {
 		}
 	}
 
-	return count >= value
+	if count >= value {
+		channel <- true
+	}
+
+	close(channel)
 }
 
-func minDigit(password string, value int) bool {
+func minDigit(password string, value int, channel chan bool) {
 	re := regexp.MustCompile("[0-9]")
 	digits := re.FindAllString(password, -1)
 
-	return len(digits) >= value
+	if len(digits) >= value {
+		channel <- true
+	}
+
+	close(channel)
 }
 
 // Essa func precisa de um ajuste no Regex||Codigo, está com problemas na validação dos contra barras \ nas senhas
 // Preciso entender como resolver problemas vinculados a forma que o Golang lida com \
 // Usar \\ gera o scape do contra barra mas continua sendo problematico em tempo de excução, crase tambem nao resolveu o problema
 // Provavelmente o problema está na funcao que estou utilizando para validar esse caso
-func minSpecialChars(password string, value int) bool {
+func minSpecialChars(password string, value int, channel chan bool) {
 	re := regexp.MustCompile("[!@#$%^&*()-\\/+{}\\[\\]]")
 	special_caracteres := re.FindAllString(password, -1)
 
-	return len(special_caracteres) >= value
+	if len(special_caracteres) >= value {
+		channel <- true
+	}
+
+	close(channel)
 }
 
 // Essa func eu queria implementar utilizando Regex porem não conseguir utilizar as funcoes do Go corretamente
@@ -138,16 +181,18 @@ func minSpecialCharsDepreciated(password string, value int) bool {
 // Pelo site https://regexr.com/ o regex a seguir -> /([a-zA-Z0-9])\1+/g resolve o problema de caracteres normais e numericos repetidos
 // Porem o Golang não interpreta a string literal com o contra barra mesmo usando crases (posso ter utilizado da maneira errada), depois eu volto nessa funcao, mesmo problema da func de caracteres especiais
 // Provavelmente o problema está na funcao que estou utilizando para validar esse caso
-func noRepeted(password string, value int) bool {
+func noRepeted(password string, value int, channel chan bool) {
 	regex := "[a-zA-Z0-9]"
 	re := regexp.MustCompile(regex)
 
 	// re := regexp.MustCompile("/^([a-z])\1+$/")
 	caracteres_repeted := re.FindAllString(password, -1)
 
-	fmt.Println(caracteres_repeted)
+	_ = caracteres_repeted
 
-	return true
+	channel <- true
+
+	close(channel)
 
 }
 
